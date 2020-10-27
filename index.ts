@@ -1,9 +1,9 @@
 const w : number = window.innerWidth 
 const h : number = window.innerHeight
-const parts : number = 4 
+const parts : number = 5
 const scGap : number = 0.02 / parts 
 const strokeFactor : number = 90 
-const sizeFactor : number = 3.9 
+const sizeFactor : number = 8.3 
 const deg : number = Math.PI / 4 
 const backColor : string = "#BDBDBD"
 const colors : Array<string> = [
@@ -14,6 +14,7 @@ const colors : Array<string> = [
     "#009688"
 ] 
 const delay : number = 20 
+const rot : number = Math.PI / 2
 
 class ScaleUtil {
 
@@ -50,15 +51,23 @@ class DrawingUtil {
         const sf1 : number = ScaleUtil.divideScale(sf, 0, parts)
         const sf2 : number = ScaleUtil.divideScale(sf, 1, parts)
         const sf3 : number = ScaleUtil.divideScale(sf, 2, parts)
+        const sf4 : number = ScaleUtil.divideScale(sf, 3, parts)
         const x : number = -r * Math.cos(deg)
         const y : number = r * Math.sin(deg)
         const x1 : number = r * Math.cos(deg)
+        if (scale < scGap) {
+            return
+        }
         context.save()
+        context.translate(w / 2, h / 2)
+        context.rotate(rot * sf4)
         context.beginPath()
-        context.arc(x, y, r * sf1, 0, 2 * Math.PI)
+        context.arc(0, 0, r * sf1, 0, 2 * Math.PI)
         context.stroke()
         context.clip()
-        DrawingUtil.drawLine(context, x, y, x + (x1 - x) * sf2, y)
+        if (sf2 >= 0.1) {
+            DrawingUtil.drawLine(context, x, y, x + (x1 - x) * sf2, y)
+        }
         context.fillRect(x, y, (x1 - x) * sf3, r - y)
         context.restore()
     }
@@ -196,7 +205,7 @@ class CLRNode {
 
 class ChordLineRect {
 
-    curr : CLRNode 
+    curr : CLRNode = new CLRNode(0)
     dir : number = 1 
 
     draw(context : CanvasRenderingContext2D) {
